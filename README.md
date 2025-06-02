@@ -53,6 +53,6 @@ sampctl init
 Compile and run:
 
 ```bash
-sampctl package build
-sampctl package run
+sampctl build
+sampctl run
 ```
