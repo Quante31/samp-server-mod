@@ -1,8 +1,8 @@
 {
 	"user": "Quante31",
 	"repo": "samp-server-mod",
-	"entry": "test.pwn",
-	"output": "gamemodes/test.amx",
+	"entry": "main.pwn",
+	"output": "gamemodes/main.amx",
 	"dependencies": [
 		"pawn-lang/samp-stdlib",
 		"Y-Less/sscanf:v2.13.8",
