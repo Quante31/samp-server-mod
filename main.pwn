@@ -4,7 +4,6 @@
 //  A freeroam gamemode for SA-MP 0.3
 //
 //----------------------------------------------------------
-
 #include <a_samp>
 #include <core>
 #include <float>
@@ -13,10 +12,11 @@
 #include <Pawn.CMD>
 #include <a_mysql>
 #include <streamer>
-
 #include "include/gl_common.inc"
 #include "include/gl_spawns.inc"
-
+#define DEBUG
+#include <nex-ac_ru.lang> //or any other
+#include <nex-ac>
 #pragma tabsize 0
 
 //----------------------------------------------------------
@@ -1122,9 +1122,20 @@ public OnGameModeInit(){
 	//UsePlayerPedAnims();
 	ManualVehicleEngineAndLights();
 	LimitGlobalChatRadius(200.0);
-	
-  	CreateDynamic3DTextLabel(!"Центральный рынок Los Santos\n/trade - Продать/Обменять",COLOR_WHITE,1129.0028,-1467.4628,15.7373,5.0);
-    CreateDynamic3DTextLabel(!"Центральный рынок\n{9CCF00}Парковать {FFFFFF}авто на улице, запрещено!\nВо избежания нежелательных штрафов, используйте\nПодземный паркинг!",COLOR_WHITE,1113.5651,-1412.7012,13.5743,10.0);
+	//Vehicles
+	CreateVehicle(411, -1024.9967, -621.8735, 31.7664, 140.0000, 48, 47, 1500);
+
+	//Actors
+	new tmpact;
+	tmpact = CreateDynamicActor(0, -1034.2731, -626.6926, 31.8302, 180.0000);
+	ApplyDynamicActorAnimation(tmpact, "ON_LOOKERS", "WAVE_LOOP", 4.0, 1, 0, 0, 0, 0);
+
+	//Checkpoints
+	SetPlayerCheckpoint(playerid, -1034.2696, -627.2476, 31.0077, 1.0);
+
+	//3D text labels
+	Create3DTextLabel("Добро пожаловать на сервер Grand World.", 0x0000FFF4, -1031.1392, -626.7695, 32.0078, 30.0000, 0, 0);
+
 	// SPECIAL
 	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/trains.txt");
 	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/pilots.txt");

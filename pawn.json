@@ -9,7 +9,8 @@
 		"Sreyas-Sreelal/samp-bcrypt:0.4.1",
 		"pBlueG/SA-MP-MySQL:R41",
 		"samp-incognito/samp-streamer-plugin:v2.9.6",
-		"katursis/Pawn.CMD:3.4.0"
+		"katursis/Pawn.CMD:3.4.0",
+		"NexiusTailer/Nex-AC"
 	],
 	"local": true,
 	"runtime": {
