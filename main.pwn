@@ -200,10 +200,6 @@ public OnPlayerConnect(playerid)
 	
 	SetTimer("GiveTerritoryIncome", 300000, true); // 300000 мс = 5 минут
 
-  	//gPlayerCitySelection[playerid] = -1;
-	//gPlayerHasCitySelected[playerid] = 0;
-	//gPlayerLastCitySelectionTick[playerid] = GetTickCount();
-
 	SetPlayerColor(playerid, COLOR_NORMAL_PLAYER);
 
 	gPlayerID[playerid] = playerid;
@@ -979,7 +975,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
                 SendClientMessage(playerid, 0x00FF00AA, "Вы успешно создали свой аккаунт, приятной игры");
 				printf("Player %d registered with name '%s' and password '%s'.", playerid, Players[playerid][Name], inputtext);	
-				SetSpawnInfo(playerid, 255, 0, 167.6, -109.2, 1.6, 272.7, 0, 0, 0, 0, 0, 0);
+				SetSpawnInfo(playerid, 255, 0, 1743, -1861, 14, 180, 0, 0, 0, 0, 0, 0);
 				TogglePlayerSpectating(playerid, false);
 				SpawnPlayer(playerid);
             }
@@ -1050,7 +1046,7 @@ public OnRetrievePlayerData(playerid)
 	gLoggedIn[playerid] = true;
 	printf("Player %d logged in with name '%s'.", playerid, Players[playerid][Name]);
 	TogglePlayerSpectating(playerid, false);
-	SetSpawnInfo(playerid, 255, 0, 167.6, -109.2, 1.6, 272.7, 0, 0, 0, 0, 0, 0);
+	SetSpawnInfo(playerid, 255, 0, 1743, -1861, 14, 180, 0, 0, 0, 0, 0, 0);
 	SpawnPlayer(playerid);
 	return 1;
 }	
@@ -1136,45 +1132,69 @@ public OnGameModeInit(){
 	ManualVehicleEngineAndLights();
 	LimitGlobalChatRadius(200.0);
 	//Vehicles
-	new vehicleid = CreateVehicle(411, -1024.9967, -621.8735, 31.7664, 140.0000, 48, 47, 1500);
-	Vehicles[vehicleid][vEngine] = VEHICLE_PARAMS_OFF;
-	Vehicles[vehicleid][vLights] = VEHICLE_PARAMS_OFF;
-	SetVehicleParamsEx(vehicleid, VEHICLE_PARAMS_ON , VEHICLE_PARAMS_ON , 0, 0, 0, 0, 0);
+	//Objects
+	CreateDynamicObject(2241, 1748.6888, -1861.6999, 13.0500, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(2241, 1737.4091, -1861.6999, 13.0500, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(19636, 1757.0966, -1861.7199, 12.5759, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(19638, 1757.7565, -1861.7055, 12.5759, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(1415, 1748.5190, -1850.0183, 12.7390, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(1328, 1750.8137, -1863.5000, 13.0528, 0.0000, 0.0000, 0.0000);
+	CreateDynamicObject(1328, 1735.1596, -1863.5000, 13.0531, 0.0000, 0.0000, 0.0000);
+
+	//Vehicles
+	CreateVehicle(462, 1728.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1720.0000, -1858.5000, 13.1999, -90.0000, 73, 141, 30);
+	CreateVehicle(462, 1726.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1720.0000, -1854.0000, 13.1999, -85.0000, 73, 141, 30);
+	CreateVehicle(462, 1738.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1734.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1732.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1730.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1720.0000, -1855.5000, 13.1999, -90.0000, 73, 141, 30);
+	CreateVehicle(462, 1736.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1724.0000, -1848.5000, 13.1999, -180.0000, 18, 175, 30);
+	CreateVehicle(462, 1720.0000, -1852.5000, 13.1999, -85.0000, 73, 141, 30);
+	CreateVehicle(462, 1720.0000, -1857.0000, 13.1999, -85.0000, 73, 141, 30);
+	CreateVehicle(462, 1720.0000, -1851.0000, 13.1999, -85.0000, 73, 141, 30);
+
 	//Actors
 	new tmpact;
-	tmpact = CreateDynamicActor(0, -1034.2731, -626.6926, 31.8302, 180.0000);
-	ApplyDynamicActorAnimation(tmpact, "ON_LOOKERS", "WAVE_LOOP", 4.0, 1, 0, 0, 0, 0);
+	tmpact = CreateDynamicActor(77, 1757.4743, -1863.0825, 12.8741, 0.0000);
+	ApplyDynamicActorAnimation(tmpact, "BEACH", "SITNWAIT_LOOP_W", 4.0, 1, 0, 0, 0, 0);
 
+	//Pickups
+	CreateDynamicPickup(19132, 1, 1743.0601, -1862.8123, 13.5745, 0);
+	CreateDynamicPickup(19132, 1, 1832.6020, -1842.5131, 13.5000, 0);
+	CreateDynamicPickup(19132, 1, 1847.6728, -1871.6512, 13.5000, 0);
+	CreateDynamicPickup(19132, 1, 1853.9855, -1914.9724, 15.2567, 0);
+	CreateDynamicPickup(19132, 1, 1872.1562, -1913.1071, 15.2584, 0);
+	CreateDynamicPickup(19132, 1, 1891.8776, -1915.1191, 15.2567, 0);
+	CreateDynamicPickup(19132, 1, 1913.4692, -1912.9195, 15.2584, 0);
+	CreateDynamicPickup(19132, 1, 1928.5590, -1916.8759, 15.2567, 0);
 
 	//3D text labels
-	Create3DTextLabel("Добро пожаловать на сервер Grand World.", 0x0000FFF4, -1031.1392, -626.7695, 32.0078, 30.0000, 0, 0);
+	Create3DTextLabel("Welcome to Grand World RP!\n/help for commands", 0xFFFFFFFF, 1738.5147, -1859.3040, 13.7761, 30.0000, 0, 0);
+
 
 	// SPECIAL
-	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/trains.txt");
-	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/pilots.txt");
+	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/bone.txt");
+	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/flint.txt");
 
-   	// LAS VENTURAS
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/lv_law.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/lv_airport.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/lv_gen.txt");
-    
-    // SAN FIERRO
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_law.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_airport.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_gen.txt");
-    
-    // LOS SANTOS
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/ls_law.txt");
+   	// LOS SANTOS & LAS VENTURAS
     total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/ls_airport.txt");
     total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/ls_gen_inner.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/ls_gen_outer.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/lv_law.txt");
     
-    // OTHER AREAS
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/whetstone.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/bone.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/flint.txt");
-    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/tierra.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/pilots.txt");
     total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/red_county.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/red_countypd.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/whetstone.txt");
+    
+    // SAN FIERRO
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_airport.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_gen.txt");
+    total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/sf_train.txt");
+
 
 	J_AddStaticVehicleEx(462, -65.5372,180.3578,2.7914,151.5640,0, 0, 100);
 	J_AddStaticVehicleEx(462, -62.7703,178.6715,2.7919,150.7218,0, 0, 100);
