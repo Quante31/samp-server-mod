@@ -14,9 +14,9 @@
 #include <streamer>
 #include "include/gl_common.inc"
 #include "include/gl_spawns.inc"
-#define DEBUG
-#include <nex-ac_ru.lang> //or any other
-#include <nex-ac>
+//#define DEBUG
+//#include <nex-ac_en.lang> //or any other
+//#include <nex-ac>
 #pragma tabsize 0
 
 //----------------------------------------------------------
@@ -69,7 +69,7 @@ new total_vehicles_from_files=0;
 #define DIALOG_REGISTER     1000
 #define DIALOG_LOGIN        1001
 
-#define MAX_NAME_LENGTH 24
+//#define MAX_NAME_LENGTH 24
 #define MAX_PASSWORD_LENGTH 64
 #define INVALID_PICKUP_ID 0
 #define FREEZE_TIME 30
@@ -80,7 +80,7 @@ new gPlayerID[MAX_PLAYERS];
 
 enum PlayerData
 {
-    Name[MAX_NAME_LENGTH],
+    Name[MAX_PLAYER_NAME],
     Level,
     Money,
     Experience,
@@ -92,7 +92,7 @@ enum PlayerData
 enum TerritoryInfo {
 	zone,
 	color,
-	name[MAX_NAME_LENGTH],
+	name[MAX_PLAYER_NAME],
 	owner,
 	Float:minX,
     Float:minY,
@@ -127,7 +127,7 @@ enum PickupInfo {
     Float:interiorY,
     Float:interiorZ,
     fractionId,
-	model
+	pmodel
 };
 enum HouseData
 {
@@ -136,16 +136,24 @@ enum HouseData
     price,
     ownerID,
     bool:locked,
-    ownerName[MAX_NAME_LENGTH],
+    ownerName[MAX_PLAYER_NAME],
 	exitPickupID
 };
-
+enum VehicleData
+{
+	vId,
+    vEngine,   
+    vLights,
+	vAlarm,
+	vDoors,
+	vBonnet,
+	vBoot
+};
 #define MAX_TERRITORIES 5
 #define MAX_TERRITORY_ATTACKERS 32
 #define INCOME_PER_TERRITORY 500
 
 #define MAX_BUSINESSES 100
-#define MAX_PICKUPS 100
 #define MAX_HOUSES 100
 
 new Territories[MAX_TERRITORIES][TerritoryInfo];
@@ -165,7 +173,11 @@ new g_PickupCount = 0;
 new Houses[MAX_HOUSES][HouseData];
 new g_HouseCount = 0;
 
+new Vehicles[MAX_VEHICLES][VehicleData];
+
 new PAYDAY = 0;
+static s_PlayerVehicle[MAX_PLAYERS] = { INVALID_VEHICLE_ID, ... };
+
 //new thisanimid=0;
 //new lastanimid=0;
 
@@ -195,11 +207,12 @@ public OnPlayerConnect(playerid)
 	SetPlayerColor(playerid, COLOR_NORMAL_PLAYER);
 
 	gPlayerID[playerid] = playerid;
-	GetPlayerName(playerid, Players[playerid][Name], MAX_NAME_LENGTH);
+	GetPlayerName(playerid, Players[playerid][Name], MAX_PLAYER_NAME);
 	CheckRegister(playerid);
 	ShowTerritoriesForPlayer(playerid);
 	
-	
+	//Checkpoints
+	SetPlayerCheckpoint(playerid, -1034.2696, -627.2476, 31.0077, 1.0);
 	/*
 	Removes vending machines
 	RemoveBuildingForPlayer(playerid, 1302, 0.0, 0.0, 0.0, 6000.0);
@@ -283,8 +296,8 @@ public OnHousesLoaded()
 	{
 		if (g_HouseCount > MAX_HOUSES) return 1;
 
-		new hID, pID, p, oID, l, exitP;
-		new oName[MAX_NAME_LENGTH];
+		new hID, pID, p, oID, exitP, bool:l;
+		new oName[MAX_PLAYER_NAME];
 
 		cache_get_value_index_int(i, 0, hID);
 		cache_get_value_index_int(i, 1, pID);
@@ -323,8 +336,8 @@ public OnTerritoriesLoaded()
 	new rows = cache_num_rows();
 	for (new i = 0; i < rows; i++)
 	{
-		new tid, towner, tname[MAX_NAME_LENGTH];
-		new Float:tminX, tminY, tmaxX, tmaxY;
+		new tid, towner, tname[MAX_PLAYER_NAME];
+		new Float:tminX, Float:tminY, Float:tmaxX, Float:tmaxY;
 
 		cache_get_value_index_int(i, 0, tid);
 		cache_get_value_index(i, 1, tname);
@@ -396,7 +409,7 @@ public OnPickupsLoaded()
         Pickups[g_PickupCount][interiorX] = intX;
         Pickups[g_PickupCount][interiorY] = intY;
         Pickups[g_PickupCount][interiorZ] = intZ;
-		Pickups[g_PickupCount][model] = m;
+		Pickups[g_PickupCount][pmodel] = m;
 
         printf("Pickup %d loaded at %.2f, %.2f, %.2f | VW: %d | Int: %d | Model: %d", g_PickupCount, posx, posy, posz, vw, interior, m);
     }
@@ -629,6 +642,7 @@ public OnPlayerSpawn(playerid)
 {
 	if(IsPlayerNPC(playerid)) return 1;
 	StopAudioStreamForPlayer(playerid);
+	//TogglePlayerControllable(playerid, true);
 	TogglePlayerControllable(playerid, false);
 	SetTimerEx("UnFreeze",GetPlayerPing(playerid)*2*(FREEZE_TIME), 0, "d", playerid);
 	//SetSpawnInfo(playerid, 255, 0, 167.6, -109.2, 1.6, 272.7, 0, 0, 0, 0, 0, 0);
@@ -965,15 +979,15 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
                 SendClientMessage(playerid, 0x00FF00AA, "Вы успешно создали свой аккаунт, приятной игры");
 				printf("Player %d registered with name '%s' and password '%s'.", playerid, Players[playerid][Name], inputtext);	
-				TogglePlayerSpectating(playerid, false);
 				SetSpawnInfo(playerid, 255, 0, 167.6, -109.2, 1.6, 272.7, 0, 0, 0, 0, 0, 0);
+				TogglePlayerSpectating(playerid, false);
 				SpawnPlayer(playerid);
             }
         }
 		else if (!response) {
 			SendClientMessage(playerid, 0xFF0000AA, "Регистрация отменена.");
 			printf("Player %d cancelled registration dialog.", playerid);
-			SendRconCommand("exit");
+			//SendRconCommand("exit");
 		}
         return 1;
     }
@@ -1115,7 +1129,6 @@ public OnGameModeInit(){
 	LoadPickupsFromDB();
 	LoadTerritoriesFromDB();
 	LoadHousesFromDB();
-	
 
 
 	//SetObjectsDefaultCameraCol(true);
@@ -1123,15 +1136,15 @@ public OnGameModeInit(){
 	ManualVehicleEngineAndLights();
 	LimitGlobalChatRadius(200.0);
 	//Vehicles
-	CreateVehicle(411, -1024.9967, -621.8735, 31.7664, 140.0000, 48, 47, 1500);
-
+	new vehicleid = CreateVehicle(411, -1024.9967, -621.8735, 31.7664, 140.0000, 48, 47, 1500);
+	Vehicles[vehicleid][vEngine] = VEHICLE_PARAMS_OFF;
+	Vehicles[vehicleid][vLights] = VEHICLE_PARAMS_OFF;
+	SetVehicleParamsEx(vehicleid, VEHICLE_PARAMS_ON , VEHICLE_PARAMS_ON , 0, 0, 0, 0, 0);
 	//Actors
 	new tmpact;
 	tmpact = CreateDynamicActor(0, -1034.2731, -626.6926, 31.8302, 180.0000);
 	ApplyDynamicActorAnimation(tmpact, "ON_LOOKERS", "WAVE_LOOP", 4.0, 1, 0, 0, 0, 0);
 
-	//Checkpoints
-	SetPlayerCheckpoint(playerid, -1034.2696, -627.2476, 31.0077, 1.0);
 
 	//3D text labels
 	Create3DTextLabel("Добро пожаловать на сервер Grand World.", 0x0000FFF4, -1031.1392, -626.7695, 32.0078, 30.0000, 0, 0);
@@ -1211,6 +1224,11 @@ public OnGameModeInit(){
 	SetTimer("GrandTimer", 1000, true);
 	return 1;
 }
+/*forward OnCheatDetected(playerid, ip_address[], type, code);
+public OnCheatDetected(playerid, ip_address[], type, code)
+{
+	return 1;
+}*/
 cmd:givecar(playerid, params[])
 {
     new modelid;
@@ -1225,20 +1243,73 @@ cmd:givecar(playerid, params[])
     GetPlayerPos(playerid, x, y, z);
     GetPlayerFacingAngle(playerid, a);
 
-    new vehicleid = CreateVehicle(modelid, x + 2.0, y, z, a, -1, -1, 600);
+    Vehicles[playerid][vId] = CreateVehicle(modelid, x + 2.0, y, z, a, -1, -1, 600);
+	Vehicles[playerid][vEngine] = VEHICLE_PARAMS_ON;
+	Vehicles[playerid][vLights] = VEHICLE_PARAMS_OFF;
+	SetVehicleParamsEx(Vehicles[playerid][vId], Vehicles[playerid][vEngine], Vehicles[playerid][vLights], 0, 0, 0, 0, 0);
+	SetVehicleHealth(Vehicles[playerid][vId], 1000.0);
+	SetPVarInt(playerid, "PutPlayerInVehicle", 1);
+	if (Vehicles[playerid][vId] == INVALID_VEHICLE_ID){
+		SendClientMessage(playerid, 0xFF0000FF, "Не удалось создать транспорт.");
+		DeletePVar(playerid, "PutPlayerInVehicle");
+	}
+	
 
-    if (vehicleid != INVALID_VEHICLE_ID)
+    return 1;
+}
+public OnVehicleStreamIn(vehicleid, forplayerid)
+{
+    // This callback is triggered when a vehicle streams in for the player (i.e. when it is loaded into memory).
+    // Check if the streamed-in vehicle is the player's and if they need to be placed in it.
+    if (vehicleid == Vehicles[forplayerid][vId] && GetPVarInt(forplayerid, "PutPlayerInVehicle"))
     {
-        PutPlayerInVehicle(playerid, vehicleid, 0);
-        SendClientMessage(playerid, 0x00FF00FF, "Машина выдана.");
-    }
-    else
-    {
-        SendClientMessage(playerid, 0xFF0000FF, "Не удалось создать транспорт.");
+        // Put the player into the vehicle.
+        PutPlayerInVehicle(forplayerid, vehicleid, 0);
+		SendClientMessage(forplayerid, 0x00FF00FF, "Машина выдана.");
+        // Clear the marker to prevent repeatedly putting the player into the vehicle
+        DeletePVar(forplayerid, "PutPlayerInVehicle");
     }
 
     return 1;
 }
+
+public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+{
+    if (GetPlayerVehicleSeat(playerid) != 0) return 1; // Только водитель
+
+    new vehicleid = Vehicles[playerid][vId];
+
+    if ((newkeys & KEY_NO) && !(oldkeys & KEY_NO))
+    {
+        Vehicles[vehicleid][vEngine] = (Vehicles[vehicleid][vEngine] == VEHICLE_PARAMS_ON) ? VEHICLE_PARAMS_OFF : VEHICLE_PARAMS_ON;
+        SetVehicleParamsEx(vehicleid, Vehicles[vehicleid][vEngine], Vehicles[vehicleid][vLights], 0, 0, 0, 0, 0);
+        SendClientMessage(playerid, 0x00FF00FF, Vehicles[vehicleid][vEngine] == VEHICLE_PARAMS_ON ? "Двигатель включен." : "Двигатель выключен.");
+    }
+
+    if ((newkeys & KEY_ACTION) && !(oldkeys & KEY_ACTION))
+    {
+        Vehicles[vehicleid][vLights] = (Vehicles[vehicleid][vLights] == VEHICLE_PARAMS_ON) ? VEHICLE_PARAMS_OFF : VEHICLE_PARAMS_ON;
+        SetVehicleParamsEx(vehicleid, Vehicles[vehicleid][vEngine], Vehicles[vehicleid][vLights], 0, 0, 0, 0, 0);
+        SendClientMessage(playerid, 0x00FF00FF, Vehicles[vehicleid][vLights] == VEHICLE_PARAMS_ON ? "Фары включены." : "Фары выключены.");
+    }
+
+    return 1;
+}
+public OnPlayerStateChange(playerid, newstate, oldstate)
+{
+	
+    if (newstate == PLAYER_STATE_DRIVER)
+    {
+		Vehicles[playerid][vId] = GetPlayerVehicleID(playerid);
+		new objective;
+		GetVehicleParamsEx(Vehicles[playerid][vId], Vehicles[playerid][vEngine], Vehicles[playerid][vLights], Vehicles[playerid][vAlarm], Vehicles[playerid][vDoors], Vehicles[playerid][vBonnet], Vehicles[playerid][vBoot], objective);
+        //SetVehicleParamsEx(Vehicles[playerid][vId], Vehicles[playerid][vEngine], Vehicles[playerid][vLights], Vehicles[playerid][vAlarm], Vehicles[playerid][vDoors], Vehicles[playerid][vBonnet], Vehicles[playerid][vBoot], 0);
+		SendClientMessage(playerid, 0xFFFF00FF, "Подсказка: N — двигатель | Ctrl — фары");
+    }
+
+    return 1;
+}
+
 cmd:givemoney(playerid, params[])
 {
     new amount;
@@ -1332,7 +1403,7 @@ cmd:pay(playerid, params[])
     GivePlayerMoney(targetid, amount);
 
     // Получаем ники
-    new senderName[MAX_NAME_LENGTH], receiverName[MAX_NAME_LENGTH];
+    new senderName[MAX_PLAYER_NAME], receiverName[MAX_PLAYER_NAME];
 	
     senderName = Players[playerid][Name];
 	receiverName = Players[targetid][Name];
@@ -1458,7 +1529,7 @@ cmd:addpickup(playerid, params[]){
     Pickups[idx][interiorX] = intX;
     Pickups[idx][interiorY] = intY;
     Pickups[idx][interiorZ] = intZ;
-	Pickups[idx][model] = m;
+	Pickups[idx][pmodel] = m;
 	
     g_PickupCount++;
 
@@ -1519,7 +1590,7 @@ cmd:listpickups(playerid, params[])
 
 		format(msg, sizeof(msg), "ID: %d | Pos: (%.2f, %.2f, %.2f) | Int: %d | VW: %d | Model: %d",
 			   i, Pickups[i][posX], Pickups[i][posY], Pickups[i][posZ],
-			   Pickups[i][pInterior], Pickups[i][virtualWorld], Pickups[i][model]);
+			   Pickups[i][pInterior], Pickups[i][virtualWorld], Pickups[i][pmodel]);
 		SendClientMessage(playerid, 0x00FF00FF, msg);
 	}
 
@@ -1587,14 +1658,13 @@ cmd:changevirtualworld(playerid, params[])
 	SendClientMessage(playerid, 0x00FF00FF, "Виртуальный мир изменён.");
 	return 1;
 }
-public J_SetPlayerPosFreeze(playerid, Float:X, Float:Y, Float:Z)
-{
+J_SetPlayerPosFreeze(playerid, Float:X, Float:Y, Float:Z){
 	SetPlayerPos(playerid, Float:X,Float:Y,Float:Z);
 	TogglePlayerControllable(playerid, false);
 	SetTimerEx("UnFreeze",GetPlayerPing(playerid)*2*(FREEZE_TIME), 0, "d", playerid);
 	return 1;
 } 
-public J_SetPlayerFacingAngle(playerid, Float:angle)
+J_SetPlayerFacingAngle(playerid, Float:angle)
 {
     SetPlayerFacingAngle(playerid, angle);
     SetCameraBehindPlayer(playerid);
